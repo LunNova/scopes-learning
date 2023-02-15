@@ -37,26 +37,28 @@ fn find-common (first second)
     error "no common item in " first "and" second
 
 fn str-has-char (str chr)
+    returning bool
     for c in str
         if (chr == c)
             return true
     false
 
 fn find-common-n (lists)
+    returning i8
+
     let first rest = (decons lists)
 
     for chr in (first as String)
-        local all-have = true
-        for l in rest
-            if (not (str-has-char (l as String) chr))
-                all-have = false
-                break
-        if all-have
+        if
+            fold (all-have = true) for l in rest
+                all-have and (str-has-char (l as String) chr)
             return (copy chr)
 
     error "no common item in " lists
 
 fn sum-priorities (input)
+    returning i32
+
     ->>
         string-split-generator input h"\n"
         map split-rucksacks
@@ -64,6 +66,7 @@ fn sum-priorities (input)
         map item-priority
         reduce-sum 0
 
+# FIXME: causes free(): double free detected in tcache 2
 fn sum-group-priorities (input)
     ->>
         string-split-generator input h"\n"
