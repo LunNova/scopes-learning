@@ -3,13 +3,12 @@ using import Array
 using import ..lun
 
 let sample-input =
-    (""""vJrwpWtwJgWrhcsFMMfFFhFp
+    S""""vJrwpWtwJgWrhcsFMMfFFhFp
          jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
          PmmdzqPrVvPwwTWBwg
          wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
          ttgJtRGJQctTZtZT
          CrZsJsPPZsGzwwsLwLmpwMDw
-    as String)
 
 let input = (read-file "aoc/input-3.txt")
 
@@ -37,7 +36,6 @@ fn find-common (first second)
     error "no common item in " first "and" second
 
 fn str-has-char (str chr)
-    returning bool
     for c in str
         if (chr == c)
             return true
@@ -45,16 +43,19 @@ fn str-has-char (str chr)
 
 fn find-common-n (lists)
     returning i8
+    viewing lists
 
-    let first rest = (decons lists)
-
-    for chr in (first as String)
+    for chr in (lists @ 0)
         if
-            fold (all-have = true) for l in rest
-                all-have and (str-has-char (l as String) chr)
+            ->>
+                'forward lists 1
+                map
+                    inline (str)
+                        str-has-char str chr
+                reduce true (inline (aggr next) (aggr and next))
             return (copy chr)
 
-    error "no common item in " lists
+    error "no common item in lists"
 
 fn sum-priorities (input)
     returning i32
@@ -66,14 +67,16 @@ fn sum-priorities (input)
         map item-priority
         reduce-sum 0
 
-# FIXME: causes free(): double free detected in tcache 2
 fn sum-group-priorities (input)
+    returning i32
+    local dst : (Array String)
+
     ->>
         string-split-generator input h"\n"
         cascade
             take 3
-            'cons-sink '()
-        map find-common-n
+            view dst
+        map (inline (lists) (defer 'clear lists) (find-common-n lists))
         map item-priority
         reduce-sum 0
 
